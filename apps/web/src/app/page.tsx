@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 
-export default function Home() {
+export default async function Home() {
+  const session = await getServerSession(authOptions);
+  const isAuthed = !!session?.user?.email;
   return (
     <main className="mx-auto max-w-6xl px-4 py-12">
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
@@ -17,12 +21,21 @@ export default function Home() {
             почте.
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/me"
-              className="inline-flex h-11 items-center justify-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-            >
-              Открыть «Мои коллекции»
-            </Link>
+            {isAuthed ? (
+              <Link
+                href="/me"
+                className="inline-flex h-11 items-center justify-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              >
+                Открыть «Мои коллекции»
+              </Link>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="inline-flex h-11 items-center justify-center rounded-lg bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              >
+                Войти
+              </Link>
+            )}
             <Link
               href="/collections"
               className="inline-flex h-11 items-center justify-center rounded-lg border border-zinc-200 bg-white px-4 text-sm font-medium text-zinc-900 hover:bg-zinc-100 dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"

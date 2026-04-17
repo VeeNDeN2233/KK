@@ -141,7 +141,7 @@ export default function MatchesPage() {
               </div>
               <div className="rounded-xl bg-zinc-50 px-3 py-2 text-sm text-zinc-700 dark:bg-black/30 dark:text-zinc-200">
                 <Link
-                  href={`/messages/${m.username}`}
+                  href={`/u/${m.username}`}
                   className="font-medium hover:underline"
                 >
                   Контакт

@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CK Web (Next.js)
 
-## Getting Started
+## Local development
 
-First, run the development server:
+### Prerequisites
+- Node.js 18.18+
+- Docker Desktop (for local Postgres)
+
+### Setup
+1) Install deps (monorepo root):
+
+```bash
+npm install
+```
+
+2) Create env file:
+- Copy [`apps/web/.env.example`](./.env.example) → `apps/web/.env.local`
+- Ensure `NEXTAUTH_SECRET` is not the placeholder value
+
+3) Start Postgres (monorepo root):
+
+```bash
+npm run db:up
+```
+
+If this fails on Windows, make sure Docker Desktop is running.
+
+4) Apply Prisma migrations:
+
+```bash
+npm run db:migrate
+```
+
+5) Start the app:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Notes:
+- We map Docker Postgres to host port `5433` to avoid conflicts with an existing local Postgres on `5432`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Useful commands
+- `npm run db:logs` — tail Postgres logs
+- `npm run db:reset` — drop DB volume and re-create (dev only)
+- `npm run db:studio` — Prisma Studio
 
-## Learn More
+### Messages (MVP)
+- UI: `/messages` (список + создание диалога), `/messages/[conversationId]` (тред)
+- `POST /api/chat/create` — body `{ "usernameOrEmail": "@user" | "email@..." }` → `{ conversationId }`
+- `GET|POST /api/chat/[conversationId]/messages` — получить сообщения / отправить `{ "text": "..." }`
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Публичные профили и поиск
+- Профиль: `/u/[username]` — только поля `@username`, имя, город/страна, флаги обмена; **email не показывается**.
+- Если у пользователя **нет** `username`, публичный URL `/u/...` для него недоступен (поиск таких записей не отдаёт).
+- Поиск: `/users` (только для залогиненных), API `GET /api/users/search?q=` (минимум 2 символа, rate limit).

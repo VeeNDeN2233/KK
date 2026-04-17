@@ -12,6 +12,7 @@ export function LoginClient() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   return (
     <main className="mx-auto max-w-md px-4 py-12">
@@ -25,13 +26,18 @@ export function LoginClient() {
         onSubmit={async (e) => {
           e.preventDefault();
           setError(null);
-          const res = await signIn("credentials", {
-            email,
-            password,
-            redirect: true,
-            callbackUrl: next,
-          });
-          if (res?.error) setError("Неверный email или пароль");
+          setSubmitting(true);
+          try {
+            const res = await signIn("credentials", {
+              email,
+              password,
+              redirect: true,
+              callbackUrl: next,
+            });
+            if (res?.error) setError("Неверный email или пароль");
+          } finally {
+            setSubmitting(false);
+          }
         }}
       >
         <label className="block">
@@ -68,9 +74,10 @@ export function LoginClient() {
 
         <button
           type="submit"
-          className="mt-5 w-full rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+          disabled={submitting}
+          className="mt-5 w-full rounded-xl bg-zinc-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-70 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
         >
-          Войти
+          {submitting ? "Входим…" : "Войти"}
         </button>
 
         <div className="mt-4 text-sm text-zinc-600 dark:text-zinc-300">

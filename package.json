@@ -6,6 +6,13 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "npm run generate -w db",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:reset": "docker compose down -v",
+    "db:logs": "docker compose logs -f postgres",
+    "db:migrate": "docker compose up -d && npm run migrate:dev -w db",
+    "db:studio": "npm run studio -w db",
     "dev": "npm run dev -w web",
     "build": "npm run build -w web",
     "lint": "npm run lint -w web"

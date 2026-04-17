@@ -1,14 +1,18 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import type { Session } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { NewThreadClient } from "./NewThreadClient";
+
+type ConversationRow = {
+  id: string;
+  updatedAt: Date;
+  participants: { user: { username: string | null; email: string; name: string | null } }[];
+  messages: { text: string }[];
+};
 
 export default function MessagesIndexPage() {
-  // Server-rendered list of conversations for the current user.
-  // If DB isn't migrated yet, this page will show an empty state.
-  const _ = 0;
-  void _;
-
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <h1 className="text-2xl font-semibold tracking-tight">Сообщения</h1>
@@ -24,7 +28,12 @@ export default function MessagesIndexPage() {
 }
 
 async function ServerThreads() {
-  const session = await getServerSession(authOptions);
+  let session: Session | null = null;
+  try {
+    session = await getServerSession(authOptions);
+  } catch {
+    session = null;
+  }
   const email = session?.user?.email;
   if (!email) {
     return (
@@ -43,7 +52,7 @@ async function ServerThreads() {
     );
   }
 
-  const conversations = await (prisma as any).conversation.findMany({
+  const conversations = await prisma.conversation.findMany({
     where: { participants: { some: { userId: me.id } } },
     orderBy: { updatedAt: "desc" },
     select: {
@@ -56,17 +65,15 @@ async function ServerThreads() {
     },
   });
 
-  if (!conversations.length) {
-    return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
-        Пока нет диалогов.
-      </div>
-    );
-  }
-
   return (
     <>
-      {conversations.map((c) => {
+      <NewThreadClient />
+      {!conversations.length ? (
+        <div className="rounded-2xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600 dark:border-white/10 dark:bg-white/5 dark:text-zinc-300">
+          Пока нет диалогов.
+        </div>
+      ) : null}
+      {(conversations as ConversationRow[]).map((c) => {
         const other =
           c.participants.map((p) => p.user).find((u) => u.email !== email) ??
           c.participants[0]?.user;

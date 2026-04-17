@@ -3,6 +3,13 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "scripts": {
+    "generate": "node scripts/prisma.mjs generate",
+    "migrate:dev": "node scripts/prisma.mjs migrate dev",
+    "migrate:deploy": "node scripts/prisma.mjs migrate deploy",
+    "studio": "node scripts/prisma.mjs studio",
+    "migrate:diff:init": "prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script"
+  },
   "dependencies": {
     "@prisma/client": "^6.16.1"
   },
